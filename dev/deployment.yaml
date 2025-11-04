@@ -1,71 +1,43 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: my-service
   labels:
     app: my-service
+  name: my-service
 spec:
-  replicas: 3
-  revisionHistoryLimit: 5
-  strategy:
-    type: RollingUpdate
-    rollingUpdate:
-      maxUnavailable: 0
-      maxSurge: 1
+  replicas: 1
   selector:
     matchLabels:
       app: my-service
+  strategy: {}
   template:
     metadata:
       labels:
         app: my-service
     spec:
-      serviceAccountName: my-service
       containers:
-        - name: my-service
-          image: nginx:1.15.1
-          imagePullPolicy: Always
-          ports:
-            - name: http
-              containerPort: 80
-          envFrom:
-            - configMapRef:
-                name: my-service-config
-            - secretRef:
-                name: my-service-secret
-          env:
-            - name: PORT
-              value: "80"
-          readinessProbe:
-            httpGet:
-              path: /readyz
-              port: http
-            initialDelaySeconds: 5
-            periodSeconds: 10
-            timeoutSeconds: 2
-            failureThreshold: 3
-          livenessProbe:
-            httpGet:
-              path: /healthz
-              port: http
-            initialDelaySeconds: 15
-            periodSeconds: 20
-            timeoutSeconds: 3
-            failureThreshold: 3
-          resources:
-            requests:
-              cpu: "100m"
-              memory: "100Mi"
-            limits:
-              cpu: "200m"
-              memory: "200Mi"
-          securityContext:
-            allowPrivilegeEscalation: false
-            readOnlyRootFilesystem: true
-            runAsNonRoot: true
-            runAsUser: 10001
-            capabilities:
-              drop: ["ALL"]
-      securityContext:
-        fsGroup: 20001
-      terminationGracePeriodSeconds: 30
+      - image: nginx:1.15.1
+        name: nginx
+        readinessProbe:
+          httpGet:
+            path: /readyz
+            port: http
+          initialDelaySeconds: 5
+          periodSeconds: 10
+          timeoutSeconds: 2
+          failureThreshold: 3
+        livenessProbe:
+          httpGet:
+            path: /healthz
+            port: http
+          initialDelaySeconds: 15
+          periodSeconds: 20
+          timeoutSeconds: 3
+          failureThreshold: 3
+        resources:
+          requests:
+            cpu: "100m"
+            memory: "100Mi"
+          limits:
+            cpu: "200m"
+            memory: "200Mi"
